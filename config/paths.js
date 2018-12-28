@@ -66,7 +66,7 @@ const resolveModule = (resolveFn, filePath) => {
 };
 
 let appPublic = resolveApp('public')
-let appHtml = resolveApp('public/index.html'),
+let appHtml = resolveApp('public/index.html')
 
 if (!fs.existsSync(appPublic)) {
   appPublic = path.join(__dirname, '../template/public')

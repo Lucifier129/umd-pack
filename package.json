@@ -1,9 +1,9 @@
 {
   "name": "umd-pack",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "a tool for creating library bundle file in UMD-style(forked from create-react-app)",
   "bin": {
-    "retool": "./bin/scripts.js"
+    "umd-pack": "./bin/scripts.js"
   },
   "dependencies": {
     "@babel/core": "7.1.6",
@@ -30,6 +30,7 @@
     "file-loader": "2.0.0",
     "fork-ts-checker-webpack-plugin-alt": "0.4.14",
     "fs-extra": "7.0.0",
+    "html-loader": "^0.5.5",
     "html-webpack-plugin": "4.0.0-alpha.2",
     "identity-obj-proxy": "3.0.0",
     "jest": "23.6.0",

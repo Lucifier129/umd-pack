@@ -113,7 +113,9 @@ module.exports = function(webpackEnv) {
     return loaders;
   };
 
-  const library = require(paths.appPackageJson).library;
+  const appPackageJson = require(paths.appPackageJson)
+  const library = appPackageJson.library;
+  const libraryFileName = appPackageJson.libraryFileName || 'bundle.js';
 
   if (!library || typeof library !== 'string') {
     throw new Error(`Missing 'library' field in package.json, use for https://webpack.js.org/configuration/output/#output-library`);
@@ -145,7 +147,7 @@ module.exports = function(webpackEnv) {
         require.resolve('react-dev-utils/webpackHotDevClient'),
       require.resolve('../preload'),
       // Finally, this is your app's code:
-      paths.appIndexJs,
+      // paths.appIndexJs, // umd-pack: alias appIndexJs to @library, import it in preload
       // We include the app code last so that if there is a runtime error during
       // initialization, it doesn't blow up the WebpackDevServer client, and
       // changing JS code would still trigger a refresh.
@@ -160,9 +162,10 @@ module.exports = function(webpackEnv) {
       pathinfo: isEnvDevelopment,
       // There will be one main bundle, and one file per asynchronous chunk.
       // In development, it does not produce real files.
-      filename: isEnvProduction
-        ? 'js/[name].[chunkhash:8].js'
-        : isEnvDevelopment && 'js/bundle.js',
+      filename: libraryFileName,
+      // filename: isEnvProduction
+      //   ? 'js/[name].[chunkhash:8].js'
+      //   : isEnvDevelopment && 'js/bundle.js',
       // There are also additional JS chunk files if you use code splitting.
       chunkFilename: isEnvProduction
         ? 'js/[name].[chunkhash:8].chunk.js'
@@ -272,6 +275,7 @@ module.exports = function(webpackEnv) {
         .map(ext => `.${ext}`)
         .filter(ext => useTypeScript || !ext.includes('ts')),
       alias: {
+        '@library': paths.appIndexJs,
         // Support React Native Web
         // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
         'react-native': 'react-native-web',
@@ -327,10 +331,11 @@ module.exports = function(webpackEnv) {
             // smaller than specified limit in bytes as data URLs to avoid requests.
             // A missing `test` is equivalent to a match.
             {
-              test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
+              test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/, /\.svg$/],
               loader: require.resolve('url-loader'),
               options: {
-                limit: 10000,
+                // limit: 10000,
+                limit: Number.POSITIVE_INFINITY, // umd-pack: force to bundle image resource
                 name: 'media/[name].[hash:8].[ext]',
               },
             },
@@ -456,22 +461,30 @@ module.exports = function(webpackEnv) {
                 'sass-loader'
               ),
             },
+            {
+              test: /\.html?$/,
+              loader: require.resolve('html-loader'),
+            },
+            {
+              exclude: [/\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.json$/],
+              loader: require.resolve('to-string-loader'),
+            },
             // "file" loader makes sure those assets get served by WebpackDevServer.
             // When you `import` an asset, you get its (virtual) filename.
             // In production, they would get copied to the `build` folder.
             // This loader doesn't use a "test" so it will catch all modules
             // that fall through the other loaders.
-            {
-              loader: require.resolve('file-loader'),
-              // Exclude `js` files to keep "css" loader working as it injects
-              // its runtime that would otherwise be processed through "file" loader.
-              // Also exclude `html` and `json` extensions so they get processed
-              // by webpacks internal loaders.
-              exclude: [/\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.json$/],
-              options: {
-                name: 'media/[name].[hash:8].[ext]',
-              },
-            },
+            // {
+            //   loader: require.resolve('file-loader'),
+            //   // Exclude `js` files to keep "css" loader working as it injects
+            //   // its runtime that would otherwise be processed through "file" loader.
+            //   // Also exclude `html` and `json` extensions so they get processed
+            //   // by webpacks internal loaders.
+            //   exclude: [/\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.json$/],
+            //   options: {
+            //     name: 'media/[name].[hash:8].[ext]',
+            //   },
+            // },
             // ** STOP ** Are you adding a new loader?
             // Make sure to add the new loader(s) before the "file" loader.
           ],
@@ -538,7 +551,7 @@ module.exports = function(webpackEnv) {
       // See https://github.com/facebook/create-react-app/issues/186
       isEnvDevelopment &&
         new WatchMissingNodeModulesPlugin(paths.appNodeModules),
-       isEnvProduction &&
+      false && isEnvProduction &&
         new MiniCssExtractPlugin({
           // Options similar to the same options in webpackOptions.output
           // both options are optional
@@ -548,7 +561,7 @@ module.exports = function(webpackEnv) {
       // Generate a manifest file which contains a mapping of all asset filenames
       // to their corresponding output file so that tools can pick it up without
       // having to parse `index.html`.
-      new ManifestPlugin({
+      false && new ManifestPlugin({
         fileName: 'asset-manifest.json',
         publicPath: publicPath,
       }),
