@@ -1,6 +1,6 @@
 {
   "name": "umd-pack",
-  "version": "1.0.3",
+  "version": "1.0.7",
   "description": "a tool for creating library bundle file in UMD-style(forked from create-react-app)",
   "bin": {
     "umd-pack": "./bin/scripts.js"
@@ -53,6 +53,7 @@
     "unfetch": "^4.0.1",
     "url-loader": "1.1.1",
     "webpack": "4.19.1",
+    "webpack-bundle-analyzer": "^3.0.3",
     "webpack-dev-server": "3.1.9",
     "webpack-manifest-plugin": "2.0.4",
     "workbox-webpack-plugin": "3.6.3"

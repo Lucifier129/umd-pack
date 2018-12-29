@@ -34,7 +34,7 @@ const getPublicUrl = appPackageJson =>
 function getServedPath(appPackageJson) {
   const publicUrl = getPublicUrl(appPackageJson);
   const servedUrl =
-    envPublicUrl || (publicUrl ? url.parse(publicUrl).pathname : '/');
+    envPublicUrl || (publicUrl ? url.parse(publicUrl).pathname : './');
   return ensureSlash(servedUrl, true);
 }
 
@@ -65,12 +65,20 @@ const resolveModule = (resolveFn, filePath) => {
   return resolveFn(`${filePath}.js`);
 };
 
+const appPackageJson = resolveApp('package.json')
+const packageJSON = require(appPackageJson)
+
 let appPublic = resolveApp('public')
 let appHtml = resolveApp('public/index.html')
 
 if (!fs.existsSync(appPublic)) {
-  appPublic = path.join(__dirname, '../template/public')
-  appHtml = path.join(__dirname, '../template/public/index.html')
+  if (packageJSON.react) {
+    appPublic = path.join(__dirname, '../template/react/public')
+    appHtml = path.join(__dirname, '../template/react/public/index.html')
+  } else {
+    appPublic = path.join(__dirname, '../template/normal/public')
+    appHtml = path.join(__dirname, '../template/normal/public/index.html')
+  }
 }
 
 // config after eject: we're in ./config/
@@ -80,8 +88,8 @@ module.exports = {
   appBuild: resolveApp('build'),
   appPublic: appPublic,
   appHtml: appHtml,
+  appPackageJson: appPackageJson,
   appIndexJs: resolveModule(resolveApp, 'src/index'),
-  appPackageJson: resolveApp('package.json'),
   appSrc: resolveApp('src'),
   appExample: resolveApp('src/example.js'),
   appTsConfig: resolveApp('tsconfig.json'),

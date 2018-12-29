@@ -29,7 +29,6 @@ switch (script) {
   case 'eject':
   case 'start':
   case 'test': {
-    require('../helper/configPackageJson')
     const result = spawn.sync(
       'node',
       nodeArgs
