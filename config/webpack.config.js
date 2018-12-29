@@ -202,7 +202,7 @@ module.exports = function(webpackEnv) {
         commonjs: 'react-dom',
         amd: 'react-dom',
         root: 'ReactDOM',
-        commonjs2: 'react'
+        commonjs2: 'react-dom'
       },
       ...appPackageJson.externals
     },
