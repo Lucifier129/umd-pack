@@ -43,6 +43,7 @@ const sassModuleRegex = /\.module\.(scss|sass)$/;
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
 module.exports = function(webpackEnv) {
+  const appPackageJson = require(paths.appPackageJson)
   const isEnvDevelopment = webpackEnv === 'development';
   const isEnvProduction = webpackEnv === 'production';
 
@@ -113,9 +114,8 @@ module.exports = function(webpackEnv) {
     return loaders;
   };
 
-  const appPackageJson = require(paths.appPackageJson)
   const library = appPackageJson.library;
-  const libraryFileName = appPackageJson.libraryFileName || 'bundle.js';
+  const libraryFileName = appPackageJson.libraryFileName || 'bundle';
 
   if (!library || typeof library !== 'string') {
     throw new Error(`Missing 'library' field in package.json, use for https://webpack.js.org/configuration/output/#output-library`);
@@ -132,26 +132,35 @@ module.exports = function(webpackEnv) {
       : isEnvDevelopment && 'cheap-module-source-map',
     // These are the "entry points" to our application.
     // This means they will be the "root" imports that are included in JS bundle.
-    entry: [
-      // Include an alternative client for WebpackDevServer. A client's job is to
-      // connect to WebpackDevServer by a socket and get notified about changes.
-      // When you save a file, the client will either apply hot updates (in case
-      // of CSS changes), or refresh the page (in case of JS changes). When you
-      // make a syntax error, this client will display a syntax error overlay.
-      // Note: instead of the default WebpackDevServer client, we use a custom one
-      // to bring better experience for Create React App users. You can replace
-      // the line below with these two lines if you prefer the stock client:
-      // require.resolve('webpack-dev-server/client') + '?/',
-      // require.resolve('webpack/hot/dev-server'),
-      isEnvDevelopment &&
-        require.resolve('react-dev-utils/webpackHotDevClient'),
-      require.resolve('../preload'),
-      // Finally, this is your app's code:
-      // paths.appIndexJs, // umd-pack: alias appIndexJs to @library, import it in preload
-      // We include the app code last so that if there is a runtime error during
-      // initialization, it doesn't blow up the WebpackDevServer client, and
-      // changing JS code would still trigger a refresh.
-    ].filter(Boolean),
+    entry: {
+      [libraryFileName]: [
+        // Include an alternative client for WebpackDevServer. A client's job is to
+        // connect to WebpackDevServer by a socket and get notified about changes.
+        // When you save a file, the client will either apply hot updates (in case
+        // of CSS changes), or refresh the page (in case of JS changes). When you
+        // make a syntax error, this client will display a syntax error overlay.
+        // Note: instead of the default WebpackDevServer client, we use a custom one
+        // to bring better experience for Create React App users. You can replace
+        // the line below with these two lines if you prefer the stock client:
+        // require.resolve('webpack-dev-server/client') + '?/',
+        // require.resolve('webpack/hot/dev-server'),
+        require.resolve('react-app-polyfill/ie9'),
+        isEnvDevelopment && appPackageJson.hot !== false &&
+          require.resolve('react-dev-utils/webpackHotDevClient'),
+        require.resolve('../preload'),
+        // Finally, this is your app's code:
+        // paths.appIndexJs, // umd-pack: alias appIndexJs to @library, import it in preload
+        // We include the app code last so that if there is a runtime error during
+        // initialization, it doesn't blow up the WebpackDevServer client, and
+        // changing JS code would still trigger a refresh.
+      ].filter(Boolean),
+      example: [
+        require.resolve('react-app-polyfill/ie9'),
+        isEnvDevelopment && appPackageJson.hot !== false &&
+          require.resolve('react-dev-utils/webpackHotDevClient'),
+        fs.existsSync(paths.appExample) ? paths.appExample : path.join(__dirname, '../preload/example')
+      ].filter(Boolean)
+    },
     output: {
       library: library,
       libraryTarget: 'umd',
@@ -162,7 +171,7 @@ module.exports = function(webpackEnv) {
       pathinfo: isEnvDevelopment,
       // There will be one main bundle, and one file per asynchronous chunk.
       // In development, it does not produce real files.
-      filename: libraryFileName,
+      filename: '[name].js',
       // filename: isEnvProduction
       //   ? 'js/[name].[chunkhash:8].js'
       //   : isEnvDevelopment && 'js/bundle.js',
@@ -181,6 +190,21 @@ module.exports = function(webpackEnv) {
               .replace(/\\/g, '/')
         : isEnvDevelopment &&
           (info => path.resolve(info.absoluteResourcePath).replace(/\\/g, '/')),
+    },
+    externals: {
+      react: {
+        commonjs: 'react',
+        amd: 'react',
+        root: 'React',
+        commonjs2: 'react'
+      },
+      'react-dom': {
+        commonjs: 'react-dom',
+        amd: 'react-dom',
+        root: 'ReactDOM',
+        commonjs2: 'react'
+      },
+      ...appPackageJson.externals,
     },
     optimization: {
       minimize: isEnvProduction,
@@ -279,6 +303,7 @@ module.exports = function(webpackEnv) {
         // Support React Native Web
         // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
         'react-native': 'react-native-web',
+        // 'whatwg-fetch': 'unfetch',
       },
       plugins: [
         // Adds support for installing with Plug'n'Play, leading to faster installs and adding
@@ -495,7 +520,9 @@ module.exports = function(webpackEnv) {
       // Generates an `index.html` file with the <script> injected.
       new HtmlWebpackPlugin(
         Object.assign(
-          {},
+          {
+            chunks: ['example']
+          },
           {
             inject: true,
             template: paths.appHtml,

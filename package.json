@@ -1,6 +1,6 @@
 {
   "name": "umd-pack",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "a tool for creating library bundle file in UMD-style(forked from create-react-app)",
   "bin": {
     "umd-pack": "./bin/scripts.js"
@@ -50,6 +50,7 @@
     "style-loader": "0.23.0",
     "terser-webpack-plugin": "1.1.0",
     "to-string-loader": "^1.1.5",
+    "unfetch": "^4.0.1",
     "url-loader": "1.1.1",
     "webpack": "4.19.1",
     "webpack-dev-server": "3.1.9",
@@ -57,12 +58,12 @@
     "workbox-webpack-plugin": "3.6.3"
   },
   "devDependencies": {
-    "react": "^16.6.0",
-    "react-dom": "^16.6.0"
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0"
   },
   "peerDependencies": {
-    "react": "^16.6.0",
-    "react-dom": "^16.6.0"
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0"
   },
   "repository": {
     "type": "git",
