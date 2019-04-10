@@ -1,6 +1,6 @@
 {
   "name": "umd-pack",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "a tool for creating library bundle file in UMD-style(forked from create-react-app)",
   "bin": {
     "umd-pack": "./bin/scripts.js"

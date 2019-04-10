@@ -19,4 +19,6 @@ if (typeof window !== 'undefined') {
 // It will use the native implementation if it's present and isn't buggy.
 Object.assign = require('object-assign');
 
-require('raf').polyfill(window);
+if (typeof window !== 'undefined') {
+  require('raf').polyfill(window);
+}
