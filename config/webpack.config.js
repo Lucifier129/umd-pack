@@ -164,6 +164,7 @@ module.exports = function(webpackEnv) {
     output: {
       library: library,
       libraryTarget: 'umd',
+      globalObject: 'this',
 
       // The build folder.
       path: isEnvProduction ? paths.appBuild : undefined,
